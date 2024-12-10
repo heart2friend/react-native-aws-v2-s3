@@ -1,18 +1,18 @@
-# react-native-background-task
+# react-native-aws-s3
 
 Background Task
 
 ## Installation
 
 ```sh
-npm install react-native-background-task
+npm install react-native-aws-s3
 ```
 
 ## Usage
 
 
 ```js
-import { multiply } from 'react-native-background-task';
+import { multiply } from 'react-native-aws-s3';
 
 // ...
 

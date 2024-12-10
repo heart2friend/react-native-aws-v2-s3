@@ -1,22 +1,40 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 
-const LINKING_ERROR =
-  `The package 'react-native-background-task' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo Go\n';
+const { AWS3Module } = NativeModules;
 
-const BackgroundTask = NativeModules.BackgroundTask
-  ? NativeModules.BackgroundTask
-  : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
+export const uploadFile = (
+  workId: string,
+  filePath: string,
+  s3Key: string,
+  bucketName: string,
+  accessKey: string,
+  secreteKey: string,
+  region: string
+) => {
+  try {
+    console.log('workId', workId);
+
+    return AWS3Module.uploadFileToS3(
+      workId,
+      filePath,
+      bucketName,
+      region,
+      accessKey,
+      secreteKey,
+      s3Key
     );
+  } catch (error) {
+    console.error('Error from WorkManager:', error);
+  }
+};
 
-export function multiply(a: number, b: number): Promise<number> {
-  return BackgroundTask.multiply(a, b);
-}
+export const getWorkStatus = async (workId: string) => {
+  try {
+    const status = await AWS3Module.getWorkStatus(workId);
+    console.log('Work Status:', status);
+    return status;
+  } catch (error) {
+    console.error('Failed to get work status:', error);
+    return null;
+  }
+};

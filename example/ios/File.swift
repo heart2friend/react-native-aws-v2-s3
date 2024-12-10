@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  BackgroundTaskExample
+//  AWSS3Example
 //
 
 import Foundation

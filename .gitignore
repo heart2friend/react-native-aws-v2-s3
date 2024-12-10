@@ -47,6 +47,9 @@ example/ios/Pods
 # Ruby
 example/vendor/
 
+# env files
+example/.env.development
+
 # node.js
 #
 node_modules/
@@ -80,3 +83,4 @@ lib/
 # React Native Codegen
 ios/generated
 android/generated
+

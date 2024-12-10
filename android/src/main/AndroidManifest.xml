@@ -1,3 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.backgroundtask">
+    package="com.awss3">
+    <application
+        android:name=".MainApplication">
+        <!-- Required for WorkManager -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.work.impl.WorkManagerInitializer" />
+        </provider>
+    </application>
 </manifest>

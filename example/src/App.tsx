@@ -1,17 +1,133 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-background-task';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Platform,
+  Button,
+  AppState,
+} from 'react-native';
+import RNFS from 'react-native-fs';
+import Config from 'react-native-config';
+import { uploadFile, getWorkStatus } from 'react-native-aws-s3';
 
 export default function App() {
-  const [result, setResult] = useState<number | undefined>();
+  const [appState, setAppState] = useState(AppState.currentState);
+  const [workStatus, setWorkStatus] = useState('Unknown');
 
   useEffect(() => {
-    multiply(3, 7).then(setResult);
+    const handleAppStateChange = async (nextAppState: any) => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        checkStatus();
+      }
+      setAppState(nextAppState);
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [appState]);
+
+  useEffect(() => {
+    checkStatus();
   }, []);
+
+  const checkStatus = async () => {
+    const status = await getWorkStatus('W10'); // Replace with your Work ID
+
+    setWorkStatus(status || 'Failed to fetch status');
+  };
+
+  const upload = () => {
+    uploadFileToS3('W1', '10MB-TESTFILE.ORG.1.pdf');
+
+    uploadFileToS3('W2', '10MB-TESTFILE.ORG.2.pdf');
+
+    uploadFileToS3('W3', '10MB-TESTFILE.ORG.3.pdf');
+
+    uploadFileToS3('W4', '10MB-TESTFILE.ORG.4.pdf');
+
+    uploadFileToS3('W5', '10MB-TESTFILE.ORG.5.pdf');
+
+    uploadFileToS3('W6', '10MB-TESTFILE.ORG.6.pdf');
+
+    uploadFileToS3('W7', '10MB-TESTFILE.ORG.7.pdf');
+
+    uploadFileToS3('W8', '10MB-TESTFILE.ORG.8.pdf');
+
+    uploadFileToS3('W9', '10MB-TESTFILE.ORG.9.pdf');
+
+    uploadFileToS3('W10', '10MB-TESTFILE.ORG.10.pdf');
+
+    uploadFileToS3('W11', '10MB-TESTFILE.ORG.11.pdf');
+
+    uploadFileToS3('W12', '10MB-TESTFILE.ORG.12.pdf');
+
+    uploadFileToS3('W13', '10MB-TESTFILE.ORG.13.pdf');
+
+    uploadFileToS3('W14', '10MB-TESTFILE.ORG.14.pdf');
+
+    uploadFileToS3('W15', '10MB-TESTFILE.ORG.15.pdf');
+
+    uploadFileToS3('W16', '10MB-TESTFILE.ORG.16.pdf');
+
+    uploadFileToS3('W17', '10MB-TESTFILE.ORG.17.pdf');
+
+    uploadFileToS3('W18', '10MB-TESTFILE.ORG.18.pdf');
+
+    uploadFileToS3('W19', '10MB-TESTFILE.ORG.19.pdf');
+
+    uploadFileToS3('W20', '10MB-TESTFILE.ORG.20.pdf');
+  };
+
+  const uploadFileToS3 = async (workId: string, fileName: string) => {
+    // Get the file path
+    let filePath = '';
+
+    if (Platform.OS === 'ios') {
+      filePath = `${RNFS.MainBundlePath}/10MB-TESTFILE.ORG.pdf`;
+    } else if (Platform.OS === 'android') {
+      // Android: Copy the asset file to a temporary path first
+      const destPath = `${RNFS.DocumentDirectoryPath}/10MB-TESTFILE.ORG.pdf`;
+      await RNFS.copyFileAssets('10MB-TESTFILE.ORG.pdf', destPath); // Copy file from assets
+      filePath = destPath;
+    }
+
+    const bucketName = Config.bucketName || '';
+    const accessKey = Config.accessKey || '';
+    const secreteKey = Config.secreteKey || '';
+    const region = Config.region || '';
+    const s3Key = Config.s3Key + fileName || '';
+
+    //Generic method for both iOS and Android
+    uploadFile(
+      workId,
+      filePath,
+      s3Key,
+      bucketName,
+      accessKey,
+      secreteKey,
+      region
+    )
+      .then((result: any) => {
+        console.log('Result', result);
+      })
+      .catch((error: any) => {
+        console.log('Error', error);
+      });
+
+    console.log(filePath);
+  };
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Button onPress={upload} title="Upload" />
+      <Text>Result: {workStatus}</Text>
     </View>
   );
 }

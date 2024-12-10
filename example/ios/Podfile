@@ -14,7 +14,7 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-target 'BackgroundTaskExample' do
+target 'AWSS3Example' do
   config = use_native_modules!
 
   use_react_native!(
@@ -23,7 +23,7 @@ target 'BackgroundTaskExample' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  target 'BackgroundTaskExampleTests' do
+  target 'AWSS3ExampleTests' do
     inherit! :complete
     # Pods for testing
   end

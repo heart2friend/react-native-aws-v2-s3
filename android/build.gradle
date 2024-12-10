@@ -1,6 +1,6 @@
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["BackgroundTask_kotlinVersion"]
+  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["AWSS3_kotlinVersion"]
 
   repositories {
     google()
@@ -31,11 +31,11 @@ if (isNewArchitectureEnabled()) {
 }
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["BackgroundTask_" + name]
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["AWSS3_" + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["BackgroundTask_" + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["AWSS3_" + name]).toInteger()
 }
 
 def supportsNamespace() {
@@ -49,7 +49,7 @@ def supportsNamespace() {
 
 android {
   if (supportsNamespace()) {
-    namespace "com.backgroundtask"
+    namespace "com.awss3"
 
     sourceSets {
       main {
@@ -88,8 +88,13 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
+def work_version = "2.9.1"
 
 dependencies {
+  implementation("androidx.work:work-runtime-ktx:$work_version")
+  // AWS SDK for Android (Core and S3)
+  implementation 'com.amazonaws:aws-android-sdk-core:2.77.1'  // For core SDK
+  implementation 'com.amazonaws:aws-android-sdk-s3:2.77.1'    // For S3 SDK
   // For < 0.71, this will be from the local maven repo
   // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin
   //noinspection GradleDynamicVersion
