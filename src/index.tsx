@@ -12,8 +12,6 @@ export const uploadFile = (
   region: string
 ) => {
   try {
-    console.log('workId', workId);
-
     return AWS3Module.uploadFileToS3(
       workId,
       filePath,
@@ -24,17 +22,25 @@ export const uploadFile = (
       s3Key
     );
   } catch (error) {
-    console.error('Error from WorkManager:', error);
+    console.error('Error from AWSS3:', error);
+    return error;
   }
 };
 
-export const getWorkStatus = async (workId: string) => {
+export const getUploadStatus = (workId: string) => {
   try {
-    const status = await AWS3Module.getWorkStatus(workId);
-    console.log('Work Status:', status);
-    return status;
+    return AWS3Module.getUploadStatus(workId);
   } catch (error) {
-    console.error('Failed to get work status:', error);
-    return null;
+    console.error('Error from AWSS3:', error);
+    return error;
+  }
+};
+
+export const cancelUpload = (workId: string) => {
+  try {
+    return AWS3Module.cancelUpload(workId);
+  } catch (error) {
+    console.error('Error from AWSS3:', error);
+    return error;
   }
 };

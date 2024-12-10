@@ -33,7 +33,6 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             .putString("accessKey", accessKey)
             .putString("secreteKey", secreteKey)
             .putString("s3Key", s3Key)
-
             .build()
 
         val constraints = Constraints.Builder()
@@ -80,7 +79,7 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     }
 
     @ReactMethod
-    fun getWorkStatus(workId: String, promise: Promise) {
+    fun getUploadStatus(workId: String, promise: Promise) {
         try {
             // Fetch the WorkInfo list for the given unique work ID
             val workInfos = WorkManager.getInstance(reactApplicationContext)
@@ -103,7 +102,7 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
     }
 
     @ReactMethod
-    fun cancelUniqueWork(workId: String, promise: Promise) {
+    fun cancelUpload(workId: String, promise: Promise) {
         try {
             WorkManager.getInstance(reactApplicationContext)
                 .cancelUniqueWork(workId)

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import Config from 'react-native-config';
-import { uploadFile, getWorkStatus } from 'react-native-aws-s3';
+import { uploadFile, getUploadStatus, cancelUpload } from 'react-native-aws-s3';
 
 export default function App() {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -38,13 +38,60 @@ export default function App() {
   }, []);
 
   const checkStatus = async () => {
-    const status = await getWorkStatus('W10'); // Replace with your Work ID
+    getUploadStatus('W10').then((result: any) => {
+      const { workId, status } = result;
+      console.log(`WorkId : ${workId} Status : ${status}`);
+      setWorkStatus(status || 'Failed to fetch status');
+    }).catch((error: any) => {
+      setWorkStatus('Failed to fetch status');
+      console.log(error);
+    });
+  };
 
-    setWorkStatus(status || 'Failed to fetch status');
+
+
+  const uploadFileToS3 = async (workId: string, fileName: string) => {
+    // Get the file path
+    let filePath = '';
+
+    if (Platform.OS === 'ios') {
+      filePath = `${RNFS.MainBundlePath}/10MB-TESTFILE.ORG.pdf`;
+    } else if (Platform.OS === 'android') {
+      // Android: Copy the asset file to a temporary path first
+      const destPath = `${RNFS.DocumentDirectoryPath}/10MB-TESTFILE.ORG.pdf`;
+      await RNFS.copyFileAssets('10MB-TESTFILE.ORG.pdf', destPath); // Copy file from assets
+      filePath = destPath;
+    }
+
+    const bucketName = Config.bucketName || '';
+    const accessKey = Config.accessKey || '';
+    const secreteKey = Config.secreteKey || '';
+    const region = Config.region || '';
+    const s3Key = Config.s3Key + fileName || '';
+
+    //Generic method for both iOS and Android
+    uploadFile(
+      workId,
+      filePath,
+      s3Key,
+      bucketName,
+      accessKey,
+      secreteKey,
+      region
+    )
+      .then((result: any) => {
+        const { workId, status } = result;
+        console.log(`WorkId : ${workId} Status : ${status}`);
+      })
+      .catch((error: any) => {
+        console.log('Error', error);
+      });
   };
 
   const upload = () => {
     uploadFileToS3('W1', '10MB-TESTFILE.ORG.1.pdf');
+    
+    cancelUpload('W1');
 
     uploadFileToS3('W2', '10MB-TESTFILE.ORG.2.pdf');
 
@@ -83,45 +130,6 @@ export default function App() {
     uploadFileToS3('W19', '10MB-TESTFILE.ORG.19.pdf');
 
     uploadFileToS3('W20', '10MB-TESTFILE.ORG.20.pdf');
-  };
-
-  const uploadFileToS3 = async (workId: string, fileName: string) => {
-    // Get the file path
-    let filePath = '';
-
-    if (Platform.OS === 'ios') {
-      filePath = `${RNFS.MainBundlePath}/10MB-TESTFILE.ORG.pdf`;
-    } else if (Platform.OS === 'android') {
-      // Android: Copy the asset file to a temporary path first
-      const destPath = `${RNFS.DocumentDirectoryPath}/10MB-TESTFILE.ORG.pdf`;
-      await RNFS.copyFileAssets('10MB-TESTFILE.ORG.pdf', destPath); // Copy file from assets
-      filePath = destPath;
-    }
-
-    const bucketName = Config.bucketName || '';
-    const accessKey = Config.accessKey || '';
-    const secreteKey = Config.secreteKey || '';
-    const region = Config.region || '';
-    const s3Key = Config.s3Key + fileName || '';
-
-    //Generic method for both iOS and Android
-    uploadFile(
-      workId,
-      filePath,
-      s3Key,
-      bucketName,
-      accessKey,
-      secreteKey,
-      region
-    )
-      .then((result: any) => {
-        console.log('Result', result);
-      })
-      .catch((error: any) => {
-        console.log('Error', error);
-      });
-
-    console.log(filePath);
   };
 
   return (
