@@ -1,6 +1,6 @@
 # react-native-aws-s3
 
-Background Task
+Background File Upload
 
 ## Installation
 
@@ -10,13 +10,31 @@ npm install react-native-aws-s3
 
 ## Usage
 
-
 ```js
-import { multiply } from 'react-native-aws-s3';
+import { uploadFile, getUploadStatus, cancelUpload } from 'react-native-aws-s3';
 
 // ...
 
-const result = await multiply(3, 7);
+ //Generic method for both iOS and Android
+    uploadFile(
+      workId,
+      filePath,
+      s3Key,
+      bucketName,
+      accessKey,
+      secreteKey,
+      region
+    )
+      .then((result: any) => {
+        const { workId, status } = result;
+        console.log(`WorkId : ${workId} Status : ${status}`);
+      })
+      .catch((error: any) => {
+        console.log(error);
+        console.log('Error Code:', error.code);
+        console.log('Error Message:', error.message);
+        console.log('User Info', error.userInfo);
+      });
 ```
 
 
