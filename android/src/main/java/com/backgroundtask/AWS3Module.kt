@@ -15,6 +15,8 @@ import com.facebook.react.bridge.*
 
 import java.util.List;
 import java.util.UUID;
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -24,58 +26,84 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
     @ReactMethod
     fun uploadFileToS3(workId : String, filePath : String,bucketName: String, region: String, accessKey: String, secreteKey: String,s3Key: String, promise: Promise) {
+    
+        try
+        {
+            val inputData = Data.Builder()
+                .putString("workId", workId)
+                .putString("filePath", filePath)
+                .putString("bucketName", bucketName)
+                .putString("region", region)
+                .putString("accessKey", accessKey)
+                .putString("secreteKey", secreteKey)
+                .putString("s3Key", s3Key)
+                .build()
 
-        val inputData = Data.Builder()
-            .putString("workId", workId)
-            .putString("filePath", filePath)
-            .putString("bucketName", bucketName)
-            .putString("region", region)
-            .putString("accessKey", accessKey)
-            .putString("secreteKey", secreteKey)
-            .putString("s3Key", s3Key)
+            //Check if file exist
+            val path = Paths.get(filePath);
+
+            if (!Files.exists(path)) {
+                // Return output to React Native
+                val userInfo = Arguments.createMap().apply {
+                    putString("workId", workId)
+                    putString("status", "Failed")                           
+                }
+
+                promise.reject("1000", "File not found.", userInfo)    
+            }
+            
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)  // Requires active internet connection
+                //.setRequiresBatteryNotLow(true)                // Battery level must not be low
+                .build()
+
+            val workRequest = OneTimeWorkRequestBuilder<S3Worker>()
+            .setInputData(inputData)
+            .setConstraints(constraints)
             .build()
+            
+            val workManager = WorkManager.getInstance(reactApplicationContext)
 
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)  // Requires active internet connection
-            //.setRequiresBatteryNotLow(true)                // Battery level must not be low
-            .build()
+            workManager.enqueueUniqueWork(workId, ExistingWorkPolicy.KEEP, workRequest)
+    
+            //Observe the work's result
+            Handler(Looper.getMainLooper()).post {workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever(object : Observer<androidx.work.WorkInfo> {
+                override fun onChanged(workInfo: androidx.work.WorkInfo?) {
+                    if (workInfo != null && workInfo.state.isFinished) {
+                        // Remove the observer to avoid memory leaks
+                        workManager.getWorkInfoByIdLiveData(workRequest.id).removeObserver(this)
 
-        val workRequest = OneTimeWorkRequestBuilder<S3Worker>()
-        .setInputData(inputData)
-        .setConstraints(constraints)
-        .build()
-        
-        val workManager = WorkManager.getInstance(reactApplicationContext)
-
-        workManager.enqueueUniqueWork(workId, ExistingWorkPolicy.KEEP, workRequest)
- 
-        //Observe the work's result
-        Handler(Looper.getMainLooper()).post {workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever(object : Observer<androidx.work.WorkInfo> {
-            override fun onChanged(workInfo: androidx.work.WorkInfo?) {
-                if (workInfo != null && workInfo.state.isFinished) {
-                    // Remove the observer to avoid memory leaks
-                    workManager.getWorkInfoByIdLiveData(workRequest.id).removeObserver(this)
-
-                    if (workInfo.state == androidx.work.WorkInfo.State.SUCCEEDED) {
-                        // Get the output data                        
+                        // Get the output data        
                         val status = workInfo.outputData.getString("status")
                         val workId = workInfo.outputData.getString("workId")
 
                         // Return output to React Native
-                        val result = Arguments.createMap().apply {
-                            putString("status",status)
+                        val userInfo = Arguments.createMap().apply {
                             putString("workId", workId)
+                            putString("status", status)                           
                         }
 
-                        promise.resolve(result);
-                    
-                    } else {                        
-                        promise.reject("ERROR", "Work failed or was cancelled")
+                        if (workInfo.state == androidx.work.WorkInfo.State.SUCCEEDED) {
+                            promise.resolve(userInfo);                    
+                        } else {  
+                            // Define the error message and details
+                            val errorMessage = "Upload work failed or was cancelled"               
+                            // Reject the promise with an error code, message, and details
+                            promise.reject("1001", errorMessage, Exception(errorMessage), userInfo)
+                        }
                     }
                 }
+            })}
+        } catch (e: Exception) {
+            
+            val userInfo = Arguments.createMap().apply {
+                putString("workId", workId)
+                putString("status", "Failed") 
+                putString("error", e.message)                        
             }
-        })
-    }
+
+            promise.reject("2001", "Error occurred in uploading work.", userInfo)
+        }       
     }
 
     @ReactMethod
@@ -87,30 +115,82 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
                 .get() // This blocks until the result is available (use with care in production)
 
             if (workInfos.isEmpty()) {
-                promise.reject("NO_WORK_FOUND", "No work found for the provided ID.")
-                return
+
+                // Return output to React Native
+                val userInfo = Arguments.createMap().apply {
+                    putString("workId", workId)
+                    putString("status", "NotFound")                           
+                }
+
+                promise.reject("1002", "No upload work found for the provided workId", userInfo)
+                
+            }
+            else
+            {              
+                // Return output to React Native
+                val userInfo = Arguments.createMap().apply {
+                    putString("workId", workId)
+                    putString("status", workInfos[0].state.toString()) // Return the state as a string (e.g., "ENQUEUED", "RUNNING", "SUCCEEDED")                          
+                }
+
+                promise.resolve(userInfo) 
             }
 
-            // Get the state of the first WorkInfo
-            val state = workInfos[0].state
-            
-            promise.resolve(state.toString()) // Return the state as a string (e.g., "ENQUEUED", "RUNNING", "SUCCEEDED")
-
         } catch (e: Exception) {
-            promise.reject("ERROR", e.message)
+            
+            val userInfo = Arguments.createMap().apply {
+                putString("workId", workId)
+                putString("status", "Failed")     
+                putString("error", e.message)                          
+            }
+
+            promise.reject("2002", "Error occurred while getting work status.", userInfo)
         }
     }
 
     @ReactMethod
     fun cancelUpload(workId: String, promise: Promise) {
         try {
-            WorkManager.getInstance(reactApplicationContext)
-                .cancelUniqueWork(workId)
 
-            promise.resolve("Work with name $workId cancelled successfully.")
+               // Fetch the WorkInfo list for the given unique work ID
+               val workInfos = WorkManager.getInstance(reactApplicationContext)
+               .getWorkInfosForUniqueWork(workId)
+               .get() // This blocks until the result is available (use with care in production)
+
+           if (workInfos.isEmpty()) 
+            {
+                // Return output to React Native
+                val userInfo = Arguments.createMap().apply {
+                    putString("workId", workId)
+                    putString("status", "NotFound")                           
+                }
+
+                promise.reject("1002", "No upload work found for the provided workId", userInfo)
+
+            }
+            else
+            {
+                WorkManager.getInstance(reactApplicationContext)
+                    .cancelUniqueWork(workId)
+
+                // Return output to React Native
+                val userInfo = Arguments.createMap().apply {
+                    putString("workId", workId)
+                    putString("status", "Cancelled")                           
+                }
+
+                promise.resolve(userInfo)
+            }
 
         } catch (e: Exception) {
-            promise.reject("ERROR", "Failed to cancel work: ${e.message}")
+
+            val userInfo = Arguments.createMap().apply {
+                putString("workId", workId)
+                putString("status", "Failed")  
+                putString("error", e.message)                             
+            }
+
+            promise.reject("2003", "Error occurred while cancelling upload work.", userInfo)
         }
     }
 }

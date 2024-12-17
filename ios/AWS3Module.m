@@ -1,4 +1,6 @@
 #import "AWS3Module.h"
+#import <CoreServices/CoreServices.h>
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 @implementation AWS3Module
 
@@ -24,18 +26,36 @@ RCT_EXPORT_METHOD(uploadFileToS3:(NSString *)workId
                     rejecter:(RCTPromiseRejectBlock)reject)
         {
 
+@try {
+    
     // Setup AWS credentials
     AWSStaticCredentialsProvider *credentialsProvider = [[AWSStaticCredentialsProvider alloc] initWithAccessKey:accessKey secretKey:secretKey];
     AWSServiceConfiguration *configuration = [[AWSServiceConfiguration alloc] initWithRegion:AWSRegionUSEast1 credentialsProvider:credentialsProvider];
     [AWSServiceManager defaultServiceManager].defaultServiceConfiguration = configuration;
 
-    // Ensure file URL is valid
+    // Ensure file URL is valid 
     NSURL *fileURL = [NSURL fileURLWithPath:filePath];
     
     if (!fileURL) {
-    reject(@"invalid_file", @"The file path is invalid.", nil);
+
+            NSDictionary *userInfo = @{
+            @"workId": workId,
+            @"status": @"Failed"
+        };
+
+        NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                              code:1000
+                                          userInfo:userInfo];
+
+        // Reject the promise with an error code, message, and details
+        reject(@"1000", @"File not found.", error);
+    
     return;
+
     }
+
+    NSString *mimeType = [self getMimeTypeForFileAtPath:filePath];
+    NSLog(@"MIME Type: %@", mimeType);
 
     // Create a Transfer Utility object
     AWSS3TransferUtility *transferUtility = [AWSS3TransferUtility defaultS3TransferUtility];
@@ -44,16 +64,34 @@ RCT_EXPORT_METHOD(uploadFileToS3:(NSString *)workId
     [[transferUtility uploadFile:fileURL
                           bucket:bucketName
                              key:s3Key
-                     contentType:@"application/pdf"
+                     contentType:mimeType
                       expression:nil
                 completionHandler:^(AWSS3TransferUtilityUploadTask *task, NSError *error) {
-                if (error) {
-                    NSLog(@"Upload failed: %@", error.localizedDescription);
-                    reject(@"upload_failed", @"Upload failed", error);
-                } else {
-                    NSLog(@"Upload completed for key: %@", task.key);
-                    resolve(@{ @"workId": workId, @"status": @"Completed" });
-                }
+                
+        if (error) {
+                    
+            NSLog(@"Upload failed: %@", error.localizedDescription);
+
+            // Return output to React Native
+            NSDictionary *userInfo = @{
+                @"workId": workId,
+                @"status": @"Failed"
+            };
+
+            NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                                code:1001
+                                            userInfo:userInfo];
+
+            // Reject the promise with an error code, message, and details
+            reject(@"1001", @"Upload work failed or was cancelled", error);
+
+        } else {
+
+            NSLog(@"Upload completed for key: %@", task.key);
+
+            resolve(@{ @"workId": workId, @"status": @"Completed" });
+
+        }
     }] continueWithBlock:^id(AWSTask *task) {
         if (task.error) {
            NSLog(@"Failed to start upload: %@", task.error.localizedDescription);           
@@ -73,12 +111,32 @@ RCT_EXPORT_METHOD(uploadFileToS3:(NSString *)workId
 
         return nil;
     }];
+}
+@catch (NSException *exception) {
+        NSLog(@"Caught exception: %@", exception.name);
+        NSLog(@"Reason: %@", exception.reason);
 
+        // Return output to React Native
+        NSDictionary *userInfo = @{
+            @"workId": workId,
+            @"status": @"Failed",
+            @"error": exception.reason
+        };
+
+        NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                              code:2001
+                                          userInfo:userInfo];
+
+        // Reject the promise with an error code, message, and details
+        reject(@"2001", @"Error occurred in uploading work.", error);
+    }
 }
 
 RCT_EXPORT_METHOD(getUploadStatus:(NSString *)workId
                          resolver:(RCTPromiseResolveBlock)resolve
                          rejecter:(RCTPromiseRejectBlock)reject) {
+
+@try {
 
     NSLog(@"Get upload status for workId: %@", workId );
     
@@ -106,8 +164,42 @@ RCT_EXPORT_METHOD(getUploadStatus:(NSString *)workId
         }            
         
         resolve(@{ @"workId": workId, @"status": statusString });
+
     } else {
-        reject(@"task_not_found", @"No upload task found for the provided workId", nil);
+
+        // Return output to React Native
+        NSDictionary *userInfo = @{
+            @"workId": workId,
+            @"status": @"NotFound"
+        };
+
+        NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                              code:1002
+                                          userInfo:userInfo];
+
+        // Reject the promise with an error code, message, and details
+        reject(@"1002", @"No upload work found for the provided workId", error);
+
+    }
+
+    }
+    @catch (NSException *exception) {
+        NSLog(@"Caught exception: %@", exception.name);
+        NSLog(@"Reason: %@", exception.reason);
+
+        // Return output to React Native
+        NSDictionary *userInfo = @{
+            @"workId": workId,
+            @"status": @"Failed",
+            @"error": exception.reason
+        };
+
+        NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                              code:2002
+                                          userInfo:userInfo];
+
+        // Reject the promise with an error code, message, and details
+        reject(@"2002", @"Error occurred while getting work status.", error);
     }
 }
 
@@ -115,6 +207,8 @@ RCT_EXPORT_METHOD(getUploadStatus:(NSString *)workId
 RCT_EXPORT_METHOD(cancelUpload:(NSString *)workId
                       resolver:(RCTPromiseResolveBlock)resolve
                       rejecter:(RCTPromiseRejectBlock)reject) {
+
+@try {
 
     AWSS3TransferUtilityUploadTask *task = self.tasks[workId];
     
@@ -127,19 +221,84 @@ RCT_EXPORT_METHOD(cancelUpload:(NSString *)workId
         if (self.tasks[workId].status == AWSS3TransferUtilityTransferStatusCancelled) {
             
             NSLog(@"Upload task for workId: %@ has been canceled", workId);
-            resolve(@{ @"workId": workId, @"status": @"Cancelled" });
+
+            // Return output to React Native
+            NSDictionary *userInfo = @{
+                @"workId": workId,
+                @"status": @"Cancelled"
+            };
+
+            resolve(userInfo);
             
         } else {
-            NSError *error = [NSError errorWithDomain:@"com.aws.s3"
-                                                 code:1001
-                                             userInfo:@{NSLocalizedDescriptionKey: @"Failed to cancel upload"}];
-            reject(@"cancel_failed", @"Failed to cancel the upload", error);
+
+            // Return output to React Native
+            NSDictionary *userInfo = @{
+                @"workId": workId,
+                @"status": @"Failed"
+            };
+
+            NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                                code:1003
+                                            userInfo:userInfo];
+
+            // Reject the promise with an error code, message, and details
+            reject(@"1003", @"No upload work found for the provided workId", error);
         }
     } else {
-        NSError *error = [NSError errorWithDomain:@"com.aws.s3"
-                                             code:1002
-                                         userInfo:@{NSLocalizedDescriptionKey: @"No ongoing upload task found"}];
-        reject(@"no_upload_task", @"No upload task found to cancel", error);
+        // Return output to React Native
+        NSDictionary *userInfo = @{
+            @"workId": workId,
+            @"status": @"NotFound"
+        };
+
+        NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                              code:1002
+                                          userInfo:userInfo];
+
+        // Reject the promise with an error code, message, and details
+        reject(@"1002", @"No upload work found for the provided workId.", error);
+    }
+
+     }
+    @catch (NSException *exception) {
+        NSLog(@"Caught exception: %@", exception.name);
+        NSLog(@"Reason: %@", exception.reason);
+
+        // Return output to React Native
+        NSDictionary *userInfo = @{
+            @"workId": workId,
+            @"status": @"Failed",
+            @"error": exception.reason
+        };
+
+        NSError *error = [NSError errorWithDomain:@"com.awss3"
+                                              code:2003
+                                          userInfo:userInfo];
+
+        // Reject the promise with an error code, message, and details
+        reject(@"2003", @"Error occurred while cancelling upload work.", error);
+    }
+}
+
+- (NSString *)getMimeTypeForFileAtPath:(NSString *)filePath {
+    // Get the file extension
+    NSString *fileExtension = [filePath pathExtension];
+    
+    // Check if iOS 14+ APIs are available
+    if (@available(iOS 14.0, *)) {
+        // Use UniformTypeIdentifiers framework
+        UTType *fileUTType = [UTType typeWithFilenameExtension:fileExtension];
+        NSString *mimeType = fileUTType.preferredMIMEType;
+        return mimeType ?: @"application/octet-stream";
+    } else {
+        // Use MobileCoreServices for iOS < 14
+        CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                (__bridge CFStringRef)fileExtension,
+                                                                NULL);
+        NSString *mimeType = (__bridge_transfer NSString *)UTTypeCopyPreferredTagWithClass(uti, kUTTagClassMIMEType);
+        if (uti) CFRelease(uti);
+        return mimeType ?: @"application/octet-stream";
     }
 }
 

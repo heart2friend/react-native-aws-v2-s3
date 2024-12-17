@@ -68,7 +68,7 @@ export default function App() {
     const secreteKey = Config.secreteKey || '';
     const region = Config.region || '';
     const s3Key = Config.s3Key + fileName || '';
-
+    
     //Generic method for both iOS and Android
     uploadFile(
       workId,
@@ -84,52 +84,55 @@ export default function App() {
         console.log(`WorkId : ${workId} Status : ${status}`);
       })
       .catch((error: any) => {
-        console.log('Error', error);
+        console.log(error);
+        console.log('Error Code:', error.code);
+        console.log('Error Message:', error.message);
+        console.log('User Info', error.userInfo);
       });
   };
 
   const upload = () => {
     uploadFileToS3('W1', '10MB-TESTFILE.ORG.1.pdf');
     
-    cancelUpload('W1');
+    // cancelUpload('W1');
 
-    uploadFileToS3('W2', '10MB-TESTFILE.ORG.2.pdf');
+    // uploadFileToS3('W2', '10MB-TESTFILE.ORG.2.pdf');
 
-    uploadFileToS3('W3', '10MB-TESTFILE.ORG.3.pdf');
+    // uploadFileToS3('W3', '10MB-TESTFILE.ORG.3.pdf');
 
-    uploadFileToS3('W4', '10MB-TESTFILE.ORG.4.pdf');
+    // uploadFileToS3('W4', '10MB-TESTFILE.ORG.4.pdf');
 
-    uploadFileToS3('W5', '10MB-TESTFILE.ORG.5.pdf');
+    // uploadFileToS3('W5', '10MB-TESTFILE.ORG.5.pdf');
 
-    uploadFileToS3('W6', '10MB-TESTFILE.ORG.6.pdf');
+    // uploadFileToS3('W6', '10MB-TESTFILE.ORG.6.pdf');
 
-    uploadFileToS3('W7', '10MB-TESTFILE.ORG.7.pdf');
+    // uploadFileToS3('W7', '10MB-TESTFILE.ORG.7.pdf');
 
-    uploadFileToS3('W8', '10MB-TESTFILE.ORG.8.pdf');
+    // uploadFileToS3('W8', '10MB-TESTFILE.ORG.8.pdf');
 
-    uploadFileToS3('W9', '10MB-TESTFILE.ORG.9.pdf');
+    // uploadFileToS3('W9', '10MB-TESTFILE.ORG.9.pdf');
 
-    uploadFileToS3('W10', '10MB-TESTFILE.ORG.10.pdf');
+    // uploadFileToS3('W10', '10MB-TESTFILE.ORG.10.pdf');
 
-    uploadFileToS3('W11', '10MB-TESTFILE.ORG.11.pdf');
+    // uploadFileToS3('W11', '10MB-TESTFILE.ORG.11.pdf');
 
-    uploadFileToS3('W12', '10MB-TESTFILE.ORG.12.pdf');
+    // uploadFileToS3('W12', '10MB-TESTFILE.ORG.12.pdf');
 
-    uploadFileToS3('W13', '10MB-TESTFILE.ORG.13.pdf');
+    // uploadFileToS3('W13', '10MB-TESTFILE.ORG.13.pdf');
 
-    uploadFileToS3('W14', '10MB-TESTFILE.ORG.14.pdf');
+    // uploadFileToS3('W14', '10MB-TESTFILE.ORG.14.pdf');
 
-    uploadFileToS3('W15', '10MB-TESTFILE.ORG.15.pdf');
+    // uploadFileToS3('W15', '10MB-TESTFILE.ORG.15.pdf');
 
-    uploadFileToS3('W16', '10MB-TESTFILE.ORG.16.pdf');
+    // uploadFileToS3('W16', '10MB-TESTFILE.ORG.16.pdf');
 
-    uploadFileToS3('W17', '10MB-TESTFILE.ORG.17.pdf');
+    // uploadFileToS3('W17', '10MB-TESTFILE.ORG.17.pdf');
 
-    uploadFileToS3('W18', '10MB-TESTFILE.ORG.18.pdf');
+    // uploadFileToS3('W18', '10MB-TESTFILE.ORG.18.pdf');
 
-    uploadFileToS3('W19', '10MB-TESTFILE.ORG.19.pdf');
+    // uploadFileToS3('W19', '10MB-TESTFILE.ORG.19.pdf');
 
-    uploadFileToS3('W20', '10MB-TESTFILE.ORG.20.pdf');
+    // uploadFileToS3('W20', '10MB-TESTFILE.ORG.20.pdf');
   };
 
   return (
