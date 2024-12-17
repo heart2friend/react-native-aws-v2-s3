@@ -1,5 +1,5 @@
 {
-  "name": "react-native-aws-s3",
+  "name": "@heart2friend/react-native-aws-s3",
   "version": "1.0.0",
   "description": "Background Task",
   "source": "./src/index.tsx",
