@@ -2,23 +2,28 @@ import { NativeModules } from 'react-native';
 
 const { AWS3Module } = NativeModules;
 
-export const uploadFile = (
-  workId: string,
-  filePath: string,
-  s3Key: string,
+export interface AS3CredentialsType {
   bucketName: string,
   accessKey: string,
   secreteKey: string,
   region: string
+}
+
+export const uploadFile = (
+  workId: string,
+  filePath: string,
+  s3Key: string,
+  as3credentials : AS3CredentialsType
+
 ) => {
   try {
     return AWS3Module.uploadFileToS3(
       workId,
       filePath,
-      bucketName,
-      region,
-      accessKey,
-      secreteKey,
+      as3credentials.bucketName,
+      as3credentials.region,
+      as3credentials.accessKey,
+      as3credentials.secreteKey,
       s3Key
     );
   } catch (error) {

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import Config from 'react-native-config';
-import { uploadFile, getUploadStatus, cancelUpload } from 'react-native-aws-s3';
+import { uploadFile, getUploadStatus, cancelUpload, type AS3CredentialsType } from 'react-native-aws-s3';
 
 export default function App() {
   const [appState, setAppState] = useState(AppState.currentState);
@@ -63,21 +63,21 @@ export default function App() {
       filePath = destPath;
     }
 
-    const bucketName = Config.bucketName || '';
-    const accessKey = Config.accessKey || '';
-    const secreteKey = Config.secreteKey || '';
-    const region = Config.region || '';
     const s3Key = Config.s3Key + fileName || '';
-    
+
+    const s3credentials: AS3CredentialsType = {
+      bucketName: Config.bucketName || '',
+      accessKey: Config.accessKey || '',
+      secreteKey: Config.secreteKey || '',
+      region: Config.region || '',
+    }
+   
     //Generic method for both iOS and Android
     uploadFile(
       workId,
       filePath,
       s3Key,
-      bucketName,
-      accessKey,
-      secreteKey,
-      region
+      s3credentials
     )
       .then((result: any) => {
         const { workId, status } = result;
@@ -93,7 +93,7 @@ export default function App() {
 
   const upload = () => {
     uploadFileToS3('W1', '10MB-TESTFILE.ORG.1.pdf');
-    
+
     // cancelUpload('W1');
 
     // uploadFileToS3('W2', '10MB-TESTFILE.ORG.2.pdf');

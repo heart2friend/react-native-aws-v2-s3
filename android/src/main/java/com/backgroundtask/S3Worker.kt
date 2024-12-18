@@ -44,11 +44,6 @@ class S3Worker(
 
         val file = File(filePath)
 
-        if (!file.exists()) {
-            Log.d(TAG,"File not found: $filePath")
-            return   Result.failure()
-        }
-
         try {
             // Create a PutObjectRequest
             val request = PutObjectRequest(bucketName, s3Key, file)

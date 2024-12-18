@@ -15,8 +15,7 @@ import com.facebook.react.bridge.*
 
 import java.util.List;
 import java.util.UUID;
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.io.File
 
 class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -39,11 +38,10 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
                 .putString("s3Key", s3Key)
                 .build()
 
-            //Check if file exist
-            val path = Paths.get(filePath);
+            val file = File(filePath)
 
-            if (!Files.exists(path)) {
-                // Return output to React Native
+            if (!file.exists()) {
+                     // Return output to React Native
                 val userInfo = Arguments.createMap().apply {
                     putString("workId", workId)
                     putString("status", "Failed")                           
@@ -51,7 +49,7 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
 
                 promise.reject("1000", "File not found.", userInfo)    
             }
-            
+           
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)  // Requires active internet connection
                 //.setRequiresBatteryNotLow(true)                // Battery level must not be low

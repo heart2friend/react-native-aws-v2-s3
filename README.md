@@ -1,29 +1,38 @@
 # react-native-aws-s3
 
-Background File Upload
+A lightweight React Native library for seamless file uploads to Amazon S3, supporting pre-signed URLs and AWS SDK integration.
+
+Capable of uploading files to S3 in foreground, background and even app is closed in Android for iOS uploads file in foreground and background. 
 
 ## Installation
 
 ```sh
-npm install react-native-aws-s3
+npm install @heart2friend/react-native-aws-s3
+or 
+yarn add @heart2friend/react-native-aws-s3
 ```
 
 ## Usage
 
 ```js
-import { uploadFile, getUploadStatus, cancelUpload } from 'react-native-aws-s3';
+import { uploadFile, getUploadStatus, cancelUpload, type  AS3CredentialsType} from 'react-native-aws-s3';
 
 // ...
 
  //Generic method for both iOS and Android
+
+     const s3credentials: AS3CredentialsType = {
+      bucketName: '',
+      accessKey:  '',
+      secreteKey: '',
+      region: '',
+    }
+
     uploadFile(
       workId,
       filePath,
       s3Key,
-      bucketName,
-      accessKey,
-      secreteKey,
-      region
+      s3credentials
     )
       .then((result: any) => {
         const { workId, status } = result;
@@ -36,7 +45,6 @@ import { uploadFile, getUploadStatus, cancelUpload } from 'react-native-aws-s3';
         console.log('User Info', error.userInfo);
       });
 ```
-
 
 ## Contributing
 
