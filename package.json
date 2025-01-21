@@ -1,7 +1,7 @@
 {
-  "name": "react-native-aws-s3",
-  "version": "1.0.3",
-  "description": "Background Task",
+  "name": "react-native-aws-v2-s3",
+  "version": "1.0.0",
+  "description": "A lightweight React Native library for seamless file uploads to Amazon S3, supporting pre-signed URLs and AWS SDK integration.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
@@ -37,7 +37,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-aws-s3-example",
+    "example": "yarn workspace react-native-aws-v2-s3-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -52,14 +52,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/heart2friend/react-native-aws-s3.git"
+    "url": "git+https://github.com/heart2friend/react-native-aws-v2-s3.git"
   },
   "author": "Amit Shinde <33868668+heart2friend@users.noreply.github.com> (https://github.com/heart2friend)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/heart2friend/react-native-aws-s3/issues"
+    "url": "https://github.com/heart2friend/react-native-aws-v2-s3/issues"
   },
-  "homepage": "https://github.com/heart2friend/react-native-aws-s3#readme",
+  "homepage": "https://github.com/heart2friend/react-native-aws-v2-s3#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

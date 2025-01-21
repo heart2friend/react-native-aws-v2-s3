@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "react-native-aws-s3": ["./src/index"]
+      "react-native-aws-v2-s3": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

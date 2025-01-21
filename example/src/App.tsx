@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import RNFS from 'react-native-fs';
 import Config from 'react-native-config';
-import { uploadFile, getUploadStatus, cancelUpload, type AS3CredentialsType } from 'react-native-aws-s3';
+import { uploadFile, getUploadStatus, cancelUpload, type AS3CredentialsType } from 'react-native-aws-v2-s3';
 
 export default function App() {
   const [appState, setAppState] = useState(AppState.currentState);

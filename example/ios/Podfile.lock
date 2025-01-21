@@ -1245,7 +1245,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-aws-s3 (0.1.0):
+  - react-native-aws-v2-s3 (1.0.5):
     - AWSCore (~> 2.37.2)
     - AWSS3 (~> 2.37.2)
     - DoubleConversion
@@ -1582,7 +1582,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
-  - react-native-aws-s3 (from `../..`)
+  - react-native-aws-v2-s3 (from `../..`)
   - react-native-config (from `../node_modules/react-native-config`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -1692,7 +1692,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
-  react-native-aws-s3:
+  react-native-aws-v2-s3:
     :path: "../.."
   react-native-config:
     :path: "../node_modules/react-native-config"
@@ -1793,7 +1793,7 @@ SPEC CHECKSUMS:
   React-logger: 26155dc23db5c9038794db915f80bd2044512c2e
   React-Mapbuffer: ad1ba0205205a16dbff11b8ade6d1b3959451658
   React-microtasksnativemodule: e771eb9eb6ace5884ee40a293a0e14a9d7a4343c
-  react-native-aws-s3: 59279828cfdd6ab8add374d8fe3c97fb89a70088
+  react-native-aws-v2-s3: d6f5ca8918d597a09b8a3e028dc767d27a484136
   react-native-config: 8f7283449bbb048902f4e764affbbf24504454af
   React-nativeconfig: aeed6e2a8ac02b2df54476afcc7c663416c12bf7
   React-NativeModulesApple: c5b7813da94136f50ef084fa1ac077332dcfc658

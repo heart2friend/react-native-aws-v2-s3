@@ -10794,9 +10794,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-aws-s3@workspace:.":
+"react-native-aws-v2-s3@workspace:.":
   version: 0.0.0-use.local
-  resolution: "react-native-aws-s3@workspace:."
+  resolution: "react-native-aws-v2-s3@workspace:."
   dependencies:
     "@commitlint/config-conventional": ^17.0.2
     "@evilmartians/lefthook": ^1.5.0

@@ -1,4 +1,4 @@
-# react-native-aws-s3
+# react-native-aws-v2-s3
 
 A lightweight React Native library for seamless file uploads to Amazon S3, supporting pre-signed URLs and AWS SDK integration.
 
@@ -7,15 +7,15 @@ Capable of uploading files to S3 in foreground, background and even app is close
 ## Installation
 
 ```sh
-npm install @heart2friend/react-native-aws-s3
+npm install react-native-aws-v2-s3
 or 
-yarn add @heart2friend/react-native-aws-s3
+yarn add react-native-aws-v2-s3
 ```
 
 ## Usage
 
 ```js
-import { uploadFile, getUploadStatus, cancelUpload, type  AS3CredentialsType} from 'react-native-aws-s3';
+import { uploadFile, getUploadStatus, cancelUpload, type  AS3CredentialsType} from 'react-native-aws-v2-s3';
 
 // ...
 
