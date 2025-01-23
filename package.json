@@ -1,6 +1,6 @@
 {
   "name": "react-native-aws-v2-s3",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight React Native library for seamless file uploads to Amazon S3, supporting pre-signed URLs and AWS SDK integration.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
