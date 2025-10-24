@@ -65,7 +65,7 @@ class AWS3Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaMo
             workManager.enqueueUniqueWork(workId, ExistingWorkPolicy.KEEP, workRequest)
     
             //Observe the work's result
-            Handler(Looper.getMainLooper()).post {workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever(object : Observer<androidx.work.WorkInfo> {
+            Handler(Looper.getMainLooper()).post {workManager.getWorkInfoByIdLiveData(workRequest.id).observeForever(object : Observer<androidx.work.WorkInfo?> {
                 override fun onChanged(workInfo: androidx.work.WorkInfo?) {
                     if (workInfo != null && workInfo.state.isFinished) {
                         // Remove the observer to avoid memory leaks
